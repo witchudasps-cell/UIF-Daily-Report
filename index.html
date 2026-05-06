@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>UIF Daily Report</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#1A3A5C;--teal:#0F6E56;--teal-lt:#E1F5EE;--teal-mid:#1D9E75;
+  --amber:#854F0B;--amber-lt:#FAEEDA;--amber-mid:#BA7517;
+  --red:#A32D2D;--red-lt:#FCEBEB;--blue-lt:#E6F1FB;
+  --gray-bg:#F4F3EF;--gray-lt:#EEECEA;--gray-mid:#C8C6BC;
+  --gray-text:#5F5E5A;--border:#D8D6CE;--white:#FFF;--text:#1A1A18;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{font-family:'IBM Plex Sans Thai',sans-serif;background:var(--gray-bg);color:var(--text);min-height:100vh;padding-bottom:48px;}
+
+/* ── TOPBAR ── */
+.topbar{background:var(--navy);padding:0 20px;height:52px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.topbar-brand{display:flex;align-items:center;gap:10px;}
+.logo{width:30px;height:30px;background:var(--teal-mid);border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-weight:500;font-size:12px;color:#fff;letter-spacing:-1px;}
+.topbar-name{color:#fff;font-size:14px;font-weight:500;}
+.deadline{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);border-radius:20px;padding:3px 11px;font-size:12px;color:#9FE1CB;font-family:'IBM Plex Mono',monospace;}
+
+/* ── PAGE ── */
+.page{max-width:760px;margin:0 auto;padding:20px 16px 0;}
+
+/* ── STEPS ── */
+.steps{display:flex;margin-bottom:20px;}
+.step{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;position:relative;}
+.step+.step::before{content:'';position:absolute;left:-50%;top:13px;width:100%;height:1.5px;background:var(--border);z-index:0;}
+.step.done+.step::before{background:var(--teal-mid);}
+.dot{width:26px;height:26px;border-radius:50%;border:2px solid var(--border);background:var(--white);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--gray-text);position:relative;z-index:1;transition:all .2s;}
+.step.active .dot{border-color:var(--teal-mid);background:var(--teal-mid);color:#fff;}
+.step.done .dot{border-color:var(--teal);background:var(--teal);color:#fff;}
+.step-lbl{font-size:10px;color:var(--gray-text);text-align:center;line-height:1.3;}
+.step.active .step-lbl,.step.done .step-lbl{color:var(--teal);}
+.step.active .step-lbl{font-weight:600;}
+
+/* ── SECTION ── */
+.sec{background:var(--white);border:1px solid var(--border);border-radius:12px;margin-bottom:12px;overflow:hidden;}
+.sec-hd{padding:11px 16px;display:flex;align-items:center;gap:9px;border-bottom:1px solid var(--border);}
+.sec-hd.teal{background:var(--teal);}
+.sec-hd.amber{background:var(--amber);}
+.sec-ico{width:22px;height:22px;border-radius:5px;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.sec-ico svg{width:13px;height:13px;fill:#fff;}
+.sec-title{font-size:13px;font-weight:600;color:#fff;flex:1;}
+.sec-body{padding:16px;}
+
+/* ── FIELDS ── */
+.fg{display:flex;flex-direction:column;gap:5px;margin-bottom:12px;}
+.fg:last-child{margin-bottom:0;}
+.fl{font-size:11px;font-weight:600;color:var(--gray-text);letter-spacing:.4px;text-transform:uppercase;}
+.fi{border:1.5px solid var(--border);border-radius:8px;padding:10px 12px;font-family:'IBM Plex Sans Thai',sans-serif;font-size:15px;color:var(--text);background:var(--white);outline:none;width:100%;-webkit-appearance:none;appearance:none;}
+.fi:focus{border-color:var(--teal-mid);box-shadow:0 0 0 3px rgba(29,158,117,.12);}
+select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235F5E5A' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:34px;cursor:pointer;}
+textarea.fi{resize:vertical;min-height:80px;line-height:1.65;}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+
+/* ── SITE BLOCK ── */
+.site-block{border:1.5px solid var(--border);border-radius:10px;margin-bottom:10px;overflow:hidden;}
+.site-block:focus-within{border-color:var(--teal-mid);}
+.site-hd{background:var(--gray-lt);padding:9px 13px;display:flex;align-items:center;gap:9px;border-bottom:1px solid var(--border);}
+.site-num{width:22px;height:22px;border-radius:50%;background:var(--navy);color:#fff;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;flex-shrink:0;}
+.site-preview{font-size:12px;font-weight:600;color:var(--navy);flex:1;}
+.site-del{background:none;border:none;cursor:pointer;color:var(--gray-mid);padding:5px 8px;border-radius:6px;font-size:14px;line-height:1;min-width:32px;min-height:32px;display:flex;align-items:center;justify-content:center;}
+.site-del:active{background:var(--red-lt);color:var(--red);}
+.site-bd{padding:12px 14px;}
+
+/* ── STATUS PILLS ── */
+.sp{background:var(--blue-lt);border-color:#85B7EB;color:#0C447C;}
+.sd{background:var(--teal-lt);border-color:#5DCAA5;color:var(--teal);}
+.sw{background:var(--amber-lt);border-color:#EF9F27;color:var(--amber);}
+.sb{background:var(--red-lt);border-color:#F09595;color:var(--red);}
+
+/* ════════════════════════════════════
+   DESKTOP layout (≥ 600px): table rows
+   ════════════════════════════════════ */
+@media(min-width:600px){
+  .jobs-legend{display:grid;grid-template-columns:22px 1fr 150px 60px 76px 32px;gap:8px;padding:0 0 6px;border-bottom:1.5px solid var(--gray-mid);margin-bottom:4px;}
+  .jobs-legend span{font-size:10px;font-weight:600;color:var(--gray-text);text-transform:uppercase;letter-spacing:.3px;}
+  .job-row{display:grid;grid-template-columns:22px 1fr 150px 60px 76px 32px;gap:8px;align-items:center;padding:5px 0;border-bottom:1px solid var(--gray-lt);}
+  .job-row:last-child{border-bottom:none;}
+  .job-num{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--gray-text);text-align:center;}
+  .job-name-input{border:1.5px solid var(--border);border-radius:6px;padding:6px 9px;font-family:'IBM Plex Sans Thai',sans-serif;font-size:13px;color:var(--text);outline:none;width:100%;background:var(--white);}
+  .job-name-input:focus{border-color:var(--teal-mid);}
+  .status-pill{border:1.5px solid var(--border);border-radius:20px;padding:5px 22px 5px 9px;font-size:11.5px;font-family:'IBM Plex Sans Thai',sans-serif;-webkit-appearance:none;appearance:none;cursor:pointer;outline:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='6' viewBox='0 0 9 6'%3E%3Cpath d='M1 1l3.5 3.5L8 1' stroke='%235F5E5A' stroke-width='1.4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 7px center;width:100%;}
+  .pct-box{border:1.5px solid var(--border);border-radius:6px;padding:5px 4px;width:100%;font-family:'IBM Plex Mono',monospace;font-size:12px;text-align:center;outline:none;background:var(--white);}
+  .pct-box:focus{border-color:var(--teal-mid);}
+  .due-box{border:1.5px solid var(--border);border-radius:6px;padding:5px 4px;width:100%;font-family:'IBM Plex Mono',monospace;font-size:12px;text-align:center;outline:none;background:var(--white);color:var(--text);}
+  .due-box:focus{border-color:var(--teal-mid);}
+  .del-job{background:none;border:none;cursor:pointer;color:var(--gray-mid);padding:4px;border-radius:4px;display:flex;align-items:center;justify-content:center;}
+  .del-job:hover{color:var(--red);background:var(--red-lt);}
+  .del-job svg{width:13px;height:13px;fill:currentColor;display:block;}
+  /* hide mobile-only elements */
+  .job-card{display:none;}
+}
+
+/* ════════════════════════════════════
+   MOBILE layout (< 600px): job cards
+   ════════════════════════════════════ */
+@media(max-width:599px){
+  /* hide desktop-only elements */
+  .jobs-legend{display:none;}
+  .job-row{display:none;}
+  /* show cards */
+  .job-card{background:var(--gray-lt);border:1px solid var(--border);border-radius:8px;padding:10px 11px;margin-bottom:8px;}
+  .job-card:last-child{margin-bottom:0;}
+  .job-card-top{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+  .job-num{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--gray-text);flex-shrink:0;}
+  .job-name-input{flex:1;border:1.5px solid var(--border);border-radius:7px;padding:9px 10px;font-family:'IBM Plex Sans Thai',sans-serif;font-size:15px;color:var(--text);background:var(--white);outline:none;-webkit-appearance:none;min-width:0;}
+  .job-name-input:focus{border-color:var(--teal-mid);}
+  .del-job{background:none;border:none;cursor:pointer;color:var(--gray-mid);padding:6px;border-radius:6px;min-width:34px;min-height:34px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .del-job:active{background:var(--red-lt);color:var(--red);}
+  .del-job svg{width:15px;height:15px;fill:currentColor;display:block;}
+  .job-card-bot{display:grid;grid-template-columns:1fr 52px 66px;gap:7px;align-items:center;}
+  .status-pill{border:1.5px solid var(--border);border-radius:20px;padding:7px 26px 7px 10px;font-size:13px;font-family:'IBM Plex Sans Thai',sans-serif;-webkit-appearance:none;appearance:none;cursor:pointer;outline:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='6' viewBox='0 0 9 6'%3E%3Cpath d='M1 1l3.5 3.5L8 1' stroke='%235F5E5A' stroke-width='1.4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;width:100%;}
+  .pct-box{border:1.5px solid var(--border);border-radius:7px;padding:7px 4px;width:100%;font-family:'IBM Plex Mono',monospace;font-size:13px;text-align:center;outline:none;background:var(--white);-webkit-appearance:none;}
+  .pct-box:focus{border-color:var(--teal-mid);}
+  .due-box{border:1.5px solid var(--border);border-radius:7px;padding:7px 4px;width:100%;font-family:'IBM Plex Mono',monospace;font-size:13px;text-align:center;outline:none;background:var(--white);-webkit-appearance:none;color:var(--text);}
+  .due-box:focus{border-color:var(--teal-mid);}
+  .fi{font-size:16px;padding:11px 13px;}
+  textarea.fi{min-height:90px;}
+}
+
+/* ── ADD BUTTONS ── */
+.add-job{margin-top:8px;background:none;border:1.5px dashed var(--gray-mid);border-radius:8px;width:100%;padding:9px;font-family:'IBM Plex Sans Thai',sans-serif;font-size:13px;color:var(--gray-text);cursor:pointer;min-height:40px;}
+.add-job:hover,.add-job:active{border-color:var(--teal-mid);color:var(--teal);background:var(--teal-lt);}
+.jobs-lbl{font-size:11px;font-weight:600;color:var(--gray-text);text-transform:uppercase;letter-spacing:.3px;margin:10px 0 6px;}
+.add-site{width:100%;background:var(--white);border:1.5px dashed var(--teal-mid);border-radius:10px;padding:12px;font-family:'IBM Plex Sans Thai',sans-serif;font-size:14px;font-weight:500;color:var(--teal);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;min-height:46px;}
+.add-site:hover,.add-site:active{background:var(--teal-lt);}
+
+/* ── ISSUE ── */
+.toggle-row{display:flex;gap:8px;margin-bottom:12px;}
+.tbtn{flex:1;padding:10px;border-radius:8px;border:1.5px solid var(--border);background:var(--white);cursor:pointer;font-family:'IBM Plex Sans Thai',sans-serif;font-size:14px;font-weight:500;color:var(--gray-text);text-align:center;min-height:42px;}
+.tbtn:active{opacity:.8;}
+.tok{background:var(--teal-lt);border-color:var(--teal-mid);color:var(--teal);}
+.tiss{background:var(--amber-lt);border-color:var(--amber-mid);color:var(--amber);}
+.issue-box{display:none;}
+.issue-box.show{display:block;}
+
+/* ── SEND ── */
+.send-area{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:16px;margin-top:6px;}
+.send-lbl{font-size:11px;font-weight:600;color:var(--gray-text);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;}
+.send-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+.sbtn{display:flex;flex-direction:column;align-items:center;gap:5px;border:1.5px solid var(--border);border-radius:10px;padding:12px 6px;cursor:pointer;background:var(--white);font-family:'IBM Plex Sans Thai',sans-serif;min-height:76px;justify-content:center;}
+.sbtn:hover{transform:translateY(-1px);box-shadow:0 3px 10px rgba(0,0,0,.08);}
+.sbtn:active{opacity:.75;transform:none;}
+.sico{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;}
+.sico svg{width:17px;height:17px;}
+.slbl{font-size:11.5px;font-weight:600;color:var(--text);text-align:center;}
+.ssub{font-size:10px;color:var(--gray-text);text-align:center;}
+.se .sico{background:var(--blue-lt);} .se .sico svg{fill:#0C447C;} .se{border-color:#85B7EB;} .se:hover{background:var(--blue-lt);}
+.sl .sico{background:#e8f5e9;} .sl .sico svg{fill:#1B5E20;} .sl{border-color:#a5d6a7;} .sl:hover{background:#e8f5e9;}
+.sp2 .sico{background:var(--red-lt);} .sp2 .sico svg{fill:var(--red);} .sp2{border-color:#F09595;} .sp2:hover{background:var(--red-lt);}
+.send-note{margin-top:10px;font-size:11px;color:var(--gray-text);text-align:center;}
+
+/* ── MODAL ── */
+.mbg{position:fixed;inset:0;background:rgba(10,20,40,.48);z-index:500;display:none;align-items:flex-end;justify-content:center;}
+.mbg.show{display:flex;}
+@media(min-width:600px){.mbg{align-items:center;padding:20px;}}
+.modal{background:var(--white);border-radius:16px 16px 0 0;width:100%;max-width:560px;max-height:88vh;display:flex;flex-direction:column;}
+@media(min-width:600px){.modal{border-radius:14px;}}
+.mhd{background:var(--navy);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;border-radius:16px 16px 0 0;flex-shrink:0;}
+@media(min-width:600px){.mhd{border-radius:14px 14px 0 0;}}
+.mhd-title{font-size:14px;font-weight:600;color:#fff;}
+.mclose{background:rgba(255,255,255,.12);border:none;border-radius:6px;width:30px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff;font-size:16px;}
+.mbody{padding:16px;overflow-y:auto;flex:1;}
+.mtext{background:var(--gray-lt);border-radius:8px;border:1px solid var(--border);padding:12px;font-size:12px;line-height:1.85;color:var(--text);font-family:'IBM Plex Mono',monospace;white-space:pre-wrap;max-height:260px;overflow-y:auto;margin-bottom:14px;}
+.mbtns{display:flex;gap:8px;}
+.mbtn{flex:1;padding:13px;border-radius:10px;font-family:'IBM Plex Sans Thai',sans-serif;font-size:14px;font-weight:600;cursor:pointer;border:1.5px solid transparent;display:flex;align-items:center;justify-content:center;gap:6px;min-height:48px;}
+.mbtn-p{background:var(--teal);color:#fff;border-color:var(--teal);}
+.mbtn-p:active{opacity:.8;}
+.mbtn-s{background:var(--white);color:var(--text);border-color:var(--border);}
+.mbtn-s:active{background:var(--gray-lt);}
+.copied{display:none;align-items:center;gap:6px;background:var(--teal-lt);border:1px solid var(--teal-mid);border-radius:8px;padding:10px 12px;font-size:13px;color:var(--teal);font-weight:500;margin-top:10px;}
+.copied.show{display:flex;}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--navy);color:#fff;padding:10px 20px;border-radius:30px;font-size:13px;font-weight:500;display:flex;align-items:center;gap:8px;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;z-index:999;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.tdot{width:7px;height:7px;border-radius:50%;background:var(--teal-mid);}
+
+/* ════════════════════════════════════
+   PRINT — always use desktop layout,
+   show all text fields in full
+   ════════════════════════════════════ */
+@media print{
+  body{background:#fff!important;padding:0!important;}
+  .topbar,.send-area,.add-job,.add-site,.del-job,.site-del,.mbg,.toast,.steps{display:none!important;}
+  .page{max-width:100%;padding:0 12px;}
+  .sec,.site-block{break-inside:avoid;}
+  .sec-hd.teal{background:#0F6E56!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  .sec-hd.amber{background:#854F0B!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  /* force desktop job layout even on small screens */
+  .job-card{display:none!important;}
+  .jobs-legend{display:grid!important;grid-template-columns:22px 1fr 150px 60px 76px;gap:8px;padding:0 0 5px;border-bottom:1.5px solid var(--gray-mid);margin-bottom:4px;}
+  .job-row{display:grid!important;grid-template-columns:22px 1fr 150px 60px 76px;gap:8px;align-items:center;padding:5px 0;border-bottom:1px solid var(--gray-lt);}
+  .job-row:last-child{border-bottom:none;}
+  .job-name-input,.status-pill,.pct-box,.due-box,.fi{border:1px solid #ccc!important;font-size:12px!important;padding:4px 7px!important;}
+  textarea.fi{display:none!important;}
+  .print-ta{display:block!important;border:1px solid #ccc;border-radius:6px;font-size:12px;font-family:'IBM Plex Sans Thai',sans-serif;padding:6px 8px;line-height:1.65;white-space:pre-wrap;word-break:break-word;color:#1A1A18;background:#fff;}
+  .sec-body{padding:10px 14px!important;}
+  .site-bd{padding:8px 12px!important;}
+  .print-only{display:block!important;}
+}
+.print-only{display:none;font-size:18px;font-weight:600;color:var(--navy);padding:12px 0 4px;}
+.print-sub{display:none;font-size:12px;color:var(--gray-text);padding-bottom:12px;border-bottom:2px solid var(--navy);margin-bottom:16px;font-family:'IBM Plex Mono',monospace;}
+@media print{.print-sub{display:block!important;}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-brand">
+    <div class="logo">UIF</div>
+    <span class="topbar-name">UIF Engineering · Daily Report</span>
+  </div>
+  <span class="deadline">⏰ ส่งก่อน 17:30</span>
+</div>
+
+<div class="page">
+
+  <div class="print-only">UIF Engineering Co., Ltd. — Daily Report</div>
+  <div class="print-sub" id="print-sub"></div>
+
+  <!-- STEPS -->
+  <div class="steps">
+    <div class="step active" id="s1"><div class="dot">1</div><div class="step-lbl">ผู้รายงาน</div></div>
+    <div class="step" id="s2"><div class="dot">2</div><div class="step-lbl">งานวันนี้</div></div>
+    <div class="step" id="s3"><div class="dot">3</div><div class="step-lbl">ปัญหา</div></div>
+    <div class="step" id="s4"><div class="dot">4</div><div class="step-lbl">แผนพรุ่งนี้</div></div>
+  </div>
+
+  <!-- 1: ผู้รายงาน -->
+  <div class="sec">
+    <div class="sec-hd teal">
+      <div class="sec-ico"><svg viewBox="0 0 16 16"><path d="M8 8a3 3 0 100-6 3 3 0 000 6zm-5 6a5 5 0 0110 0H3z"/></svg></div>
+      <span class="sec-title">ผู้รายงาน</span>
+    </div>
+    <div class="sec-body">
+      <div class="row2">
+        <div class="fg">
+          <label class="fl">ชื่อ-สกุล</label>
+          <input class="fi" type="text" id="eng-name" placeholder="ชื่อผู้รายงาน" autocomplete="name">
+        </div>
+        <div class="fg">
+          <label class="fl">ตำแหน่ง</label>
+          <select class="fi" id="eng-role">
+            <option value="">-- เลือก --</option>
+            <option>Field Engineer</option>
+            <option>Vibration/Diagnostic Engineer</option>
+            <option>Supervisor</option>
+            <option>Foreman</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2: งานวันนี้ -->
+  <div class="sec">
+    <div class="sec-hd teal">
+      <div class="sec-ico"><svg viewBox="0 0 16 16"><path d="M8 1a4 4 0 00-4 4c0 3 4 8 4 8s4-5 4-8a4 4 0 00-4-4zm0 5.5a1.5 1.5 0 110-3 1.5 1.5 0 010 3z"/></svg></div>
+      <span class="sec-title">งานวันนี้ — เพิ่มได้หลาย Site</span>
+    </div>
+    <div class="sec-body">
+      <div id="sites"></div>
+      <button class="add-site" id="add-site-btn" type="button">
+        <svg viewBox="0 0 16 16" style="width:14px;height:14px;fill:var(--teal)"><path d="M8 2v12M2 8h12"/></svg>
+        เพิ่ม Site / ลูกค้า
+      </button>
+    </div>
+  </div>
+
+  <!-- 3: ปัญหา -->
+  <div class="sec">
+    <div class="sec-hd amber">
+      <div class="sec-ico"><svg viewBox="0 0 16 16"><path d="M8 1L1 14h14L8 1zm0 3l5.2 9H2.8L8 4zm-.5 3v3h1V7h-1zm0 4v1h1v-1h-1z"/></svg></div>
+      <span class="sec-title">ปัญหา / สิ่งที่ต้องการการสนับสนุน</span>
+    </div>
+    <div class="sec-body">
+      <div class="toggle-row">
+        <button class="tbtn tok" id="btn-ok" type="button">✓ ไม่มีปัญหา</button>
+        <button class="tbtn" id="btn-iss" type="button">⚠ มีปัญหา</button>
+      </div>
+      <div class="issue-box" id="issue-box">
+        <textarea class="fi" id="issue-txt" placeholder="ระบุปัญหา และสิ่งที่ต้องการจากทีม&#10;เช่น รอ bearing จากจัดซื้อ, ต้องการ Supervisor ประสานลูกค้า"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4: แผนพรุ่งนี้ -->
+  <div class="sec">
+    <div class="sec-hd teal">
+      <div class="sec-ico"><svg viewBox="0 0 16 16"><path d="M3 1v2H1v12h14V3h-2V1h-2v2H5V1H3zm-1 5h12v8H2V6zm2 2v1.5h1.5V8H4zm3 0v1.5h1.5V8H7zm3 0v1.5h1.5V8H10zm-6 3v1.5h1.5V11H4zm3 0v1.5h1.5V11H7zm3 0v1.5h1.5V11H10z"/></svg></div>
+      <span class="sec-title">แผนงานพรุ่งนี้</span>
+    </div>
+    <div class="sec-body">
+      <textarea class="fi" id="plan-txt" placeholder="เช่น เช้า — IRPC ทดสอบ final run P-301&#10;บ่าย — HMC Polymers ตรวจ Agitator 2A-451&#10;หรือระบุ Site และงานที่จะไปพรุ่งนี้" style="min-height:96px"></textarea>
+    </div>
+  </div>
+
+  <!-- SEND -->
+  <div class="send-area">
+    <div class="send-lbl">ส่ง Report</div>
+    <div class="send-grid">
+      <button class="sbtn se" id="btn-email" type="button">
+        <div class="sico"><svg viewBox="0 0 20 20"><path d="M2 4a2 2 0 012-2h12a2 2 0 012 2v12a2 2 0 01-2 2H4a2 2 0 01-2-2V4zm2 0l6 5 6-5H4zm0 2v8h12V6l-6 5-6-5z"/></svg></div>
+        <span class="slbl">ส่ง Email</span>
+        <span class="ssub">เปิด mail app</span>
+      </button>
+      <button class="sbtn sl" id="btn-line" type="button">
+        <div class="sico"><svg viewBox="0 0 20 20"><path d="M10 2C5.6 2 2 5.2 2 9.1c0 2.7 1.6 5 4 6.3-.1.5-.6 2.4-.7 2.7-.1.3.1.6.4.5.3-.1 3.4-2.2 4-2.6.4.1.9.1 1.3.1 4.4 0 8-3.2 8-7.1C20 5.2 16.4 2 10 2zm-3 9H5V7h1v3h1V9zm1-2H7V7h1v2zm4 2h-1l-2-3v3H8V7h1l2 3V7h1v4zm3 0h-2V7h1v3h1v1z"/></svg></div>
+        <span class="slbl">Copy LINE</span>
+        <span class="ssub">วาง Group ได้เลย</span>
+      </button>
+      <button class="sbtn sp2" id="btn-pdf" type="button">
+        <div class="sico"><svg viewBox="0 0 20 20"><path d="M4 2h8l4 4v12a2 2 0 01-2 2H4a2 2 0 01-2-2V4a2 2 0 012-2zm8 0v4h4M6 10h8M6 14h5" stroke="#A32D2D" stroke-width="1.4" fill="none" stroke-linecap="round"/></svg></div>
+        <span class="slbl">PDF</span>
+        <span class="ssub">Ctrl+P / บันทึก</span>
+      </button>
+    </div>
+    <div class="send-note">ส่งก่อน 17:30 น. ทุกวัน</div>
+  </div>
+
+</div>
+
+<!-- MODAL -->
+<div class="mbg" id="mbg">
+  <div class="modal">
+    <div class="mhd">
+      <span class="mhd-title" id="mtitle">สรุป Report</span>
+      <button class="mclose" id="btn-mclose" type="button">✕</button>
+    </div>
+    <div class="mbody">
+      <div class="mtext" id="mtext"></div>
+      <div class="mbtns" id="mbtns"></div>
+      <div class="copied" id="copied">
+        <svg viewBox="0 0 16 16"><path d="M3 8l4 4 6-6" stroke="#0F6E56" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+        คัดลอกแล้ว — วาง LINE ได้เลย
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><div class="tdot"></div><span id="tmsg"></span></div>
+
+<script>
+var now = new Date();
+var dateStr = now.toLocaleDateString('th-TH',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+var timeStr = now.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
+
+// print sub-header
+var ps = document.getElementById('print-sub');
+if(ps) ps.textContent = dateStr + '  |  พิมพ์เวลา ' + timeStr + ' น.';
+
+var CLIENTS = ['IRPC','HMC Polymers','TPAC','TPCC','AGC','Kawasaki','Bridgestone','Idemitsu','SCG','PTT Phenol','Yokohama','Vinythai','ZEON','NSPT','Valeo','TNC','Thai Paper Mill','Hosokawa Micron','BIG','DID','ZAP','ASM'];
+
+var siteIdx = 0, jobMap = {};
+
+function addSite() {
+  siteIdx++;
+  var sid = 's' + siteIdx;
+  var n = siteIdx;
+  jobMap[sid] = 0;
+
+  var block = document.createElement('div');
+  block.className = 'site-block'; block.id = sid;
+
+  // header
+  var hd = document.createElement('div'); hd.className = 'site-hd';
+  var num = document.createElement('div'); num.className = 'site-num'; num.textContent = n;
+  var prev = document.createElement('span'); prev.className = 'site-preview'; prev.id = sid+'-prev'; prev.textContent = 'Site ที่ '+n;
+  var delS = document.createElement('button'); delS.className = 'site-del'; delS.type = 'button'; delS.textContent = '✕';
+  delS.addEventListener('click', function(){ block.remove(); tick(); });
+  hd.appendChild(num); hd.appendChild(prev); hd.appendChild(delS);
+
+  // body
+  var bd = document.createElement('div'); bd.className = 'site-bd';
+
+  // site name
+  var fgN = document.createElement('div'); fgN.className = 'fg';
+  var lblN = document.createElement('label'); lblN.className = 'fl'; lblN.textContent = 'ลูกค้า / Site';
+  var inN = document.createElement('input'); inN.className = 'fi'; inN.type = 'text';
+  inN.id = sid+'-name'; inN.placeholder = 'เช่น IRPC, HMC Polymers';
+  inN.setAttribute('list','cl-'+sid); inN.setAttribute('autocomplete','off');
+  inN.addEventListener('input', function(){ prev.textContent = this.value || ('Site ที่ '+n); tick(); });
+  var dl = document.createElement('datalist'); dl.id = 'cl-'+sid;
+  CLIENTS.forEach(function(c){ var o = document.createElement('option'); o.value = c; dl.appendChild(o); });
+  fgN.appendChild(lblN); fgN.appendChild(inN); fgN.appendChild(dl);
+
+  // time
+  var fgT = document.createElement('div'); fgT.className = 'fg';
+  var lblT = document.createElement('label'); lblT.className = 'fl'; lblT.textContent = 'ช่วงเวลา';
+  var selT = document.createElement('select'); selT.className = 'fi';
+  ['-- เลือก --','ทั้งวัน','เช้า (8:00–12:00)','บ่าย (13:00–17:00)','OT / กลางคืน'].forEach(function(v,i){
+    var o = document.createElement('option'); o.value = i===0?'':v; o.textContent = v; selT.appendChild(o);
+  });
+  selT.addEventListener('change', tick);
+  fgT.appendChild(lblT); fgT.appendChild(selT);
+
+  // jobs label
+  var jlbl = document.createElement('div'); jlbl.className = 'jobs-lbl'; jlbl.textContent = 'รายการงาน';
+
+  // desktop legend (hidden on mobile via CSS)
+  var legend = document.createElement('div'); legend.className = 'jobs-legend';
+  ['','ชื่องาน / Tag No.','สถานะ','% เสร็จ','กำหนดเสร็จ'].forEach(function(t){
+    var s = document.createElement('span'); s.textContent = t; legend.appendChild(s);
+  });
+
+  // jobs container
+  var jobsDiv = document.createElement('div'); jobsDiv.id = sid+'-jobs';
+
+  // add job btn
+  var addBtn = document.createElement('button'); addBtn.className = 'add-job'; addBtn.type = 'button'; addBtn.textContent = '+ เพิ่มงาน';
+  addBtn.addEventListener('click', function(){ addJob(sid); });
+
+  bd.appendChild(fgN); bd.appendChild(fgT); bd.appendChild(jlbl); bd.appendChild(legend); bd.appendChild(jobsDiv); bd.appendChild(addBtn);
+  block.appendChild(hd); block.appendChild(bd);
+  document.getElementById('sites').appendChild(block);
+  addJob(sid);
+  tick();
+}
+
+function addJob(sid) {
+  jobMap[sid] = (jobMap[sid]||0) + 1;
+  var jnum = jobMap[sid];
+
+  /* shared inputs — created once, used in both layouts */
+  var nameIn = document.createElement('input');
+  nameIn.className = 'job-name-input'; nameIn.type = 'text'; nameIn.placeholder = 'ชื่องาน / Tag No.'; nameIn.autocomplete = 'off';
+  nameIn.addEventListener('input', tick);
+
+  var statusSel = document.createElement('select'); statusSel.className = 'status-pill sp';
+  [{v:'p',t:'กำลังดำเนินการ'},{v:'w',t:'รอ spare part'},{v:'a',t:'รออนุมัติลูกค้า'},{v:'d',t:'เสร็จแล้ว'},{v:'b',t:'หยุดชะงัก'}].forEach(function(item){
+    var o = document.createElement('option'); o.value = item.v; o.textContent = item.t; statusSel.appendChild(o);
+  });
+  statusSel.addEventListener('change', function(){ styleStatus(this); tick(); });
+
+  var pctIn = document.createElement('input'); pctIn.className = 'pct-box'; pctIn.type = 'text'; pctIn.placeholder = '%';
+  pctIn.addEventListener('input', tick);
+
+  var dueIn = document.createElement('input'); dueIn.className = 'due-box'; dueIn.type = 'text'; dueIn.placeholder = 'DD/MM';
+
+  function makeDelBtn(target) {
+    var b = document.createElement('button'); b.className = 'del-job'; b.type = 'button';
+    b.innerHTML = '<svg viewBox="0 0 14 14"><path d="M1 3h12M5 3V1h4v2M6 6v5M8 6v5M2 3l1 9h8l1-9" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round"/></svg>';
+    b.addEventListener('click', function(){ target.remove(); });
+    return b;
+  }
+
+  /* ── DESKTOP ROW (shown on ≥600px) ── */
+  var row = document.createElement('div'); row.className = 'job-row';
+  var numSpanR = document.createElement('span'); numSpanR.className = 'job-num'; numSpanR.textContent = jnum;
+  row.appendChild(numSpanR);
+  row.appendChild(nameIn.cloneNode(false));    // clone: desktop gets its own input
+  row.appendChild(statusSel.cloneNode(true));
+  row.appendChild(pctIn.cloneNode(false));
+  row.appendChild(dueIn.cloneNode(false));
+  row.appendChild(makeDelBtn(row));
+  // wire events on cloned elements
+  row.querySelectorAll('.job-name-input,.pct-box').forEach(function(el){ el.addEventListener('input', tick); });
+  row.querySelector('.status-pill').addEventListener('change', function(){ styleStatus(this); tick(); });
+
+  /* ── MOBILE CARD (shown on <600px) ── */
+  var card = document.createElement('div'); card.className = 'job-card';
+  var top = document.createElement('div'); top.className = 'job-card-top';
+  var numSpanC = document.createElement('span'); numSpanC.className = 'job-num'; numSpanC.textContent = jnum+'.';
+  var nameInC = document.createElement('input'); nameInC.className = 'job-name-input'; nameInC.type = 'text'; nameInC.placeholder = 'ชื่องาน / Tag No.'; nameInC.autocomplete = 'off';
+  nameInC.addEventListener('input', tick);
+  top.appendChild(numSpanC); top.appendChild(nameInC); top.appendChild(makeDelBtn(card));
+
+  var bot = document.createElement('div'); bot.className = 'job-card-bot';
+  var statC = document.createElement('select'); statC.className = 'status-pill sp';
+  [{v:'p',t:'กำลังดำเนินการ'},{v:'w',t:'รอ spare part'},{v:'a',t:'รออนุมัติลูกค้า'},{v:'d',t:'เสร็จแล้ว'},{v:'b',t:'หยุดชะงัก'}].forEach(function(item){
+    var o = document.createElement('option'); o.value = item.v; o.textContent = item.t; statC.appendChild(o);
+  });
+  statC.addEventListener('change', function(){ styleStatus(this); tick(); });
+  var pctC = document.createElement('input'); pctC.className = 'pct-box'; pctC.type = 'text'; pctC.placeholder = '%'; pctC.addEventListener('input', tick);
+  var dueC = document.createElement('input'); dueC.className = 'due-box'; dueC.type = 'text'; dueC.placeholder = 'DD/MM';
+  bot.appendChild(statC); bot.appendChild(pctC); bot.appendChild(dueC);
+  card.appendChild(top); card.appendChild(bot);
+
+  /* wrap both in a container so we can read data from either */
+  var wrap = document.createElement('div');
+  wrap.className = 'job-entry';
+  wrap.appendChild(row);
+  wrap.appendChild(card);
+  document.getElementById(sid+'-jobs').appendChild(wrap);
+}
+
+function styleStatus(sel) {
+  var map = {p:'sp',d:'sd',w:'sw',a:'sw',b:'sb'};
+  sel.className = 'status-pill ' + (map[sel.value]||'sp');
+}
+
+function setIssue(has) {
+  document.getElementById('issue-box').classList.toggle('show', has);
+  document.getElementById('btn-ok').className  = 'tbtn'+(has?'':' tok');
+  document.getElementById('btn-iss').className = 'tbtn'+(has?' tiss':'');
+  tick();
+}
+
+function tick() {
+  var hasName = !!document.getElementById('eng-name').value.trim();
+  var hasSite = !!document.querySelector('.site-block');
+  var hasPlan = !!document.getElementById('plan-txt').value.trim();
+  setStep('s1', hasName); setStep('s2', hasSite); setStep('s3', true); setStep('s4', hasPlan);
+}
+function setStep(id, done) {
+  var el = document.getElementById(id);
+  el.classList.toggle('done', done); el.classList.toggle('active', !done);
+}
+
+/* read data from whichever layout is visible */
+function readJob(wrap) {
+  var isMobile = window.innerWidth < 600;
+  if (isMobile) {
+    var card = wrap.querySelector('.job-card');
+    return {
+      name:   (card.querySelector('.job-name-input')||{}).value || '',
+      status: (card.querySelector('select')||{}).value || 'p',
+      pct:    (card.querySelector('.pct-box')||{}).value || '',
+      due:    (card.querySelector('.due-box')||{}).value || ''
+    };
+  } else {
+    var row = wrap.querySelector('.job-row');
+    var inputs = row.querySelectorAll('input');
+    return {
+      name:   inputs[0] ? inputs[0].value : '',
+      status: (row.querySelector('select')||{}).value || 'p',
+      pct:    inputs[1] ? inputs[1].value : '',
+      due:    inputs[2] ? inputs[2].value : ''
+    };
+  }
+}
+
+function buildText() {
+  var name = document.getElementById('eng-name').value.trim() || '(ไม่ระบุ)';
+  var role = document.getElementById('eng-role').value;
+  var plan = document.getElementById('plan-txt').value.trim() || '-';
+  var hasIss = document.getElementById('issue-box').classList.contains('show');
+  var issue = hasIss ? (document.getElementById('issue-txt').value.trim() || '-') : 'ไม่มี';
+  var SEmap = {p:'🔧 กำลังดำเนินการ',d:'✅ เสร็จแล้ว',w:'⏳ รอ spare part',a:'📋 รออนุมัติลูกค้า',b:'🚫 หยุดชะงัก'};
+  var hr = '─'.repeat(34);
+  var siteTxt = '';
+
+  document.querySelectorAll('.site-block').forEach(function(block, si) {
+    var sid = block.id;
+    var sname = ((document.getElementById(sid+'-name')||{}).value||'').trim() || '(ไม่ระบุ)';
+    var timeEl = block.querySelector('select');
+    var time = timeEl ? timeEl.value : '';
+    siteTxt += '🏭 Site '+(si+1)+': '+sname+(time?' ['+time+']':'')+'\n';
+    var wraps = block.querySelectorAll('.job-entry');
+    if (!wraps.length) { siteTxt += '   (ยังไม่ระบุงาน)\n'; }
+    wraps.forEach(function(wrap, ji) {
+      var j = readJob(wrap);
+      siteTxt += '   '+(ji+1)+'. '+(j.name.trim()||'-')+'\n';
+      siteTxt += '      '+(SEmap[j.status]||'🔧')+' | '+(j.pct||'-')+(j.due?' | กำหนดเสร็จ '+j.due:'')+'\n';
+    });
+    siteTxt += '\n';
+  });
+
+  var t = '📋 DAILY REPORT — UIF Engineering\n'+hr+'\n';
+  t += '📅 '+dateStr+'\n';
+  t += '👤 '+name+(role?' ('+role+')':'')+'\n';
+  t += hr+'\n'+siteTxt+hr+'\n';
+  t += '⚠ ปัญหา / Support:\n   '+issue.replace(/\n/g,'\n   ')+'\n';
+  t += hr+'\n';
+  t += '📆 แผนพรุ่งนี้:\n   '+plan.replace(/\n/g,'\n   ')+'\n';
+  t += hr+'\n';
+  t += 'ส่งโดย '+name+'  |  '+timeStr+' น.';
+  return t;
+}
+
+function validate() {
+  if (!document.getElementById('eng-name').value.trim()) {
+    showToast('⚠ กรุณาระบุชื่อผู้รายงาน');
+    document.getElementById('eng-name').focus();
+    document.getElementById('eng-name').style.borderColor = '#E24B4A';
+    setTimeout(function(){ document.getElementById('eng-name').style.borderColor = ''; }, 2000);
+    return false;
+  }
+  if (!document.querySelector('.site-block')) { showToast('⚠ กรุณาเพิ่ม Site อย่างน้อย 1 ที่'); return false; }
+  return true;
+}
+
+function openModal(type) {
+  if (!validate()) return;
+  var txt = buildText(); window._txt = txt;
+  document.getElementById('mtext').textContent = txt;
+  document.getElementById('copied').classList.remove('show');
+  var mbtns = document.getElementById('mbtns'); mbtns.innerHTML = '';
+
+  if (type === 'email') {
+    document.getElementById('mtitle').textContent = '📧 ส่ง Email';
+    var cb = document.createElement('button'); cb.className = 'mbtn mbtn-s'; cb.type = 'button'; cb.textContent = 'Copy ข้อความ';
+    cb.addEventListener('click', copyTxt);
+    var mb = document.createElement('button'); mb.className = 'mbtn mbtn-p'; mb.type = 'button'; mb.textContent = 'เปิด Email App';
+    mb.addEventListener('click', function(){
+      var name = document.getElementById('eng-name').value.trim();
+      var subj = encodeURIComponent('[Daily Report] '+name+' — '+now.toLocaleDateString('th-TH'));
+      window.open('mailto:uifengineering@gmail.com?subject='+subj+'&body='+encodeURIComponent(window._txt||''));
+    });
+    mbtns.appendChild(cb); mbtns.appendChild(mb);
+  } else {
+    document.getElementById('mtitle').textContent = '💬 Copy ไป LINE';
+    var cb2 = document.createElement('button'); cb2.className = 'mbtn mbtn-p'; cb2.type = 'button'; cb2.textContent = 'คัดลอกข้อความทั้งหมด';
+    cb2.addEventListener('click', copyTxt); mbtns.appendChild(cb2);
+  }
+  document.getElementById('mbg').classList.add('show');
+}
+
+function copyTxt() {
+  var t = window._txt || '';
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(t).then(function(){
+      document.getElementById('copied').classList.add('show'); showToast('✓ คัดลอกแล้ว!');
+    }).catch(function(){ fallbackCopy(t); });
+  } else { fallbackCopy(t); }
+}
+function fallbackCopy(t) {
+  var ta = document.createElement('textarea'); ta.value = t; ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0';
+  document.body.appendChild(ta); ta.focus(); ta.select();
+  try { document.execCommand('copy'); document.getElementById('copied').classList.add('show'); showToast('✓ คัดลอกแล้ว!'); }
+  catch(e) { showToast('กดค้างที่ข้อความแล้วเลือก Copy'); }
+  document.body.removeChild(ta);
+}
+function closeMdl() { document.getElementById('mbg').classList.remove('show'); }
+function doPrint() {
+  if (!validate()) return;
+  beforePrint();
+  setTimeout(function() { window.print(); }, 50);
+}
+function showToast(msg) {
+  document.getElementById('tmsg').textContent = msg;
+  var t = document.getElementById('toast'); t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 3000);
+}
+
+// Wire buttons
+document.getElementById('add-site-btn').addEventListener('click', addSite);
+document.getElementById('btn-ok').addEventListener('click', function(){ setIssue(false); });
+document.getElementById('btn-iss').addEventListener('click', function(){ setIssue(true); });
+document.getElementById('btn-email').addEventListener('click', function(){ openModal('email'); });
+document.getElementById('btn-line').addEventListener('click', function(){ openModal('line'); });
+document.getElementById('btn-pdf').addEventListener('click', doPrint);
+document.getElementById('btn-mclose').addEventListener('click', closeMdl);
+document.getElementById('mbg').addEventListener('click', function(e){ if(e.target===this) closeMdl(); });
+document.getElementById('eng-name').addEventListener('input', tick);
+document.getElementById('eng-role').addEventListener('change', tick);
+document.getElementById('plan-txt').addEventListener('input', tick);
+
+addSite();
+
+// Convert textareas to divs before print so content shows in full
+var _printing = false;
+function beforePrint() {
+  if (_printing) return;
+  _printing = true;
+  document.querySelectorAll('textarea.fi').forEach(function(ta) {
+    var div = document.createElement('div');
+    div.className = 'print-ta';
+    div.textContent = ta.value || '';
+    ta.parentNode.insertBefore(div, ta.nextSibling);
+  });
+}
+function afterPrint() {
+  _printing = false;
+  document.querySelectorAll('.print-ta').forEach(function(div) { div.remove(); });
+}
+window.addEventListener('beforeprint', beforePrint);
+window.addEventListener('afterprint', afterPrint);
+</script>
+</body>
+</html>
